@@ -44,44 +44,42 @@ training_images = training_images / 255.0
 X_train, X_test, y_train, y_test = train_test_split(
     training_images, training_labels, test_size=0.3, random_state=42)
 
-HP_EPOCHS = hp.HParam('epochs', hp.IntInterval(1, 100))
-HP_NUM_UNITS = hp.HParam('num_units', hp.Discrete([16, 32, 64, 128, 256]))
-HP_DROPOUT = hp.HParam('dropout', hp.RealInterval(0.1, 0.2))
-HP_OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['Adam', 'NAdam', 'SGD']))
+EPOCHS = hp.HParam('epochs', hp.IntInterval(30, 100))
+NEURONS = hp.HParam('num_units', hp.Discrete([128, 256]))
+DROPOUT = hp.HParam('dropout', hp.RealInterval(0.1, 0.2))
+OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['Adam', 'NAdam', 'SGD']))
 
 METRIC_ACCURACY = 'accuracy'
 
 
 with tf.summary.create_file_writer('logs/hparam_tuning').as_default():
   hp.hparams_config(
-    hparams=[HP_NUM_UNITS, HP_DROPOUT, HP_OPTIMIZER, HP_EPOCHS],
+    hparams=[NEURONS, DROPOUT, OPTIMIZER, EPOCHS],
     metrics=[hp.Metric(METRIC_ACCURACY, display_name='Accuracy')],
   )
 
-
-
 def train_test_model(hparams): 
     log_dir = "logs\\fit\\" \
-    + "neurons-" + str(hparams[HP_NUM_UNITS]) + " " \
-    + "dropout-" + str(hparams[HP_DROPOUT]) + " " \
-    + "epochs-" + str(hparams[HP_EPOCHS]) + " " \
-    + str(hparams[HP_OPTIMIZER]) + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    + "neurons-" + str(hparams[NEURONS]) + " " \
+    + "dropout-" + str(hparams[DROPOUT]) + " " \
+    + "epochs-" + str(hparams[EPOCHS]) + " " \
+    + str(hparams[OPTIMIZER]) + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
     
     model = tf.keras.models.Sequential([
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(hparams[HP_NUM_UNITS], activation=tf.nn.relu),
-        tf.keras.layers.Dropout(hparams[HP_DROPOUT]),
+        tf.keras.layers.Dense(hparams[NEURONS], activation=tf.nn.relu),
+        tf.keras.layers.Dropout(hparams[DROPOUT]),
         tf.keras.layers.Dense(30, activation=tf.nn.softmax),
     ])
 
     model.compile(
-        optimizer=hparams[HP_OPTIMIZER],
+        optimizer=hparams[OPTIMIZER],
         loss='sparse_categorical_crossentropy',
         metrics=['accuracy'],
     )
 
-    model.fit(np.array(X_train), np.array(y_train), epochs=hparams[HP_EPOCHS])
+    model.fit(np.array(X_train), np.array(y_train), epochs=hparams[EPOCHS])
     _, accuracy = model.evaluate(np.array(X_train), np.array(y_train)
     ,
     callbacks=[
@@ -98,15 +96,15 @@ def run(run_dir, hparams):
 
 session_num = 0
 
-for epoch in range(HP_EPOCHS.domain.min_value, HP_EPOCHS.domain.max_value):
-    for num_units in HP_NUM_UNITS.domain.values:
-        for dropout_rate in (HP_DROPOUT.domain.min_value, HP_DROPOUT.domain.max_value):
-            for optimizer in HP_OPTIMIZER.domain.values:
+for epoch in range(EPOCHS.domain.min_value, EPOCHS.domain.max_value):
+    for num_units in NEURONS.domain.values:
+        for dropout_rate in (DROPOUT.domain.min_value, DROPOUT.domain.max_value):
+            for optimizer in OPTIMIZER.domain.values:
                 hparams = {
-                    HP_NUM_UNITS: num_units,
-                    HP_DROPOUT: dropout_rate,
-                    HP_OPTIMIZER: optimizer,
-                    HP_EPOCHS: epoch
+                    NEURONS: num_units,
+                    DROPOUT: dropout_rate,
+                    OPTIMIZER: optimizer,
+                    EPOCHS: epoch
                 }
                 run_name = f"run-{session_num}_{epoch}_{num_units}_{dropout_rate}_{optimizer}"
                 print('--- Starting trial: %s' % run_name)
