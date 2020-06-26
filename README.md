@@ -36,3 +36,8 @@ This would happen when you feed the model too much data and starts memorising th
 ![final](./img/final.png)
 
 As it can be seen in the graph above, the highlighted model achieved an accuracy of 100% using 256 neurons for the Dense layer, a dropout value of 0.2 and the Adam optimizer where only 21 epochs were needed. This model proved that once the neuronal networks passes the mark of 21 epochs the accuracy might or might not drop - overfitting. To conclude this, there's no point of additional optimization since perfection was already obtained.
+
+# Conclusion
+In the end, I would like to conclude that using Hyperparameter Tuning was proven to work out better than I could ever expect, where I would rather not imagine how I was to test all of those model variations manually. Tensorboard has proven to be quite a valuable tool when improving a given model, it provided me with multiple graphics and felt much friendlier that matplotlib. Last but not least, the Dropout optimisation made the models significantly lighter compared to the ones I ended up on my first assignment where I didn’t use it. 
+
+The benchmark process was long and exhausting, especially for my GPU which had to generate models for all possible variations of the given parameters, which were in total 1158 and it took about 10 hours on my GTX 1070 to complete, but the results proved to be extraordinary. 
